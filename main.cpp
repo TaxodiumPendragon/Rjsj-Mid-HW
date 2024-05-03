@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "third_parties/nlohmann/json.hpp"
+#include "third_parties/cpp-httplib/httplib.h"
 #include "utils.hpp"
 #include "citation.h"
 
@@ -22,7 +23,6 @@ std::string readFromFile(const std::string &inputPath)
     {
         text += line + "\n";
     }
-
     return text;
 }
 
@@ -67,6 +67,40 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     return citations;
 }
 
+httplib::Client cli{API_ENDPOINT};
+void CitWeb::ask()
+{
+    auto result = cli.Get("/title/" + encodeUriComponent(url));
+    if (result && result->status == httplib::OK_200)
+    {
+        nlohmann::json t = nlohmann::json::parse(result->body);
+        title = t["title"];
+    }
+    else
+    {
+        auto err = result.error();
+        std::cerr << "HTTP error: " << httplib::to_string(err) << std::endl;
+    }
+}
+
+void CitBook::ask()
+{
+    auto result = cli.Get("/isbn/" + encodeUriComponent(isbn));
+    if (result && result->status == httplib::OK_200)
+    {
+        nlohmann::json t = nlohmann::json::parse(result->body);
+        author = t["author"];
+        title = t["title"];
+        p = t["publisher"];
+        year = t["year"];
+    }
+    else
+    {
+        auto err = result.error();
+        std::cerr << "HTTP error: " << httplib::to_string(err) << std::endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
     bool stdo{true};
@@ -101,9 +135,8 @@ int main(int argc, char **argv)
     // "docman", "-c", "citations.json", "input.txt"
     // TODO 处理错误：文章的中括号有误
     auto citations = loadCitations(citationPath);
-    std::vector<Citation *> printedCitations{citations};
 
-    // FIXME: read all input to the string, and process citations in the input text
+    // read all input to the string
     std::string input;
     if (stdi)
     {
@@ -125,9 +158,38 @@ int main(int argc, char **argv)
     output << input; // print the paragraph first
     output << "\nReferences:\n";
 
+    std::vector<Citation *> printedCitations{};
+    // TODO process citations in the input text
+
+    std::vector<std::string> ids;
+    std::string::size_type pos = 0;
+    while ((pos = input.find('[', pos)) != std::string::npos)
+    {
+        std::string::size_type endPos = input.find(']', pos);
+        if (endPos != std::string::npos)
+        {
+            std::string idStr = input.substr(pos + 1, endPos - pos - 1);
+            ids.push_back(idStr);
+        }
+        pos = endPos;
+    }
+
+    for (const auto &id : ids)
+    {
+        for (auto c : citations)
+        {
+            if (c->getid() == id)
+            {
+                printedCitations.push_back(c);
+                c->ask();
+                break;
+            }
+        }
+    }
+
     for (auto c : printedCitations)
     {
-        // FIXME: 打印引用格式输出
+        // 打印引用格式输出
         c->print();
     }
 

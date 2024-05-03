@@ -11,6 +11,7 @@ class Citation
 public:
     Citation(std::string x) : id(x) {}
     virtual void print() = 0;
+    virtual void ask()=0;
     std::string getid()
     {
         return id;
@@ -22,16 +23,18 @@ class CitBook : public Citation
     std::string isbn;
 
 public:
-    std::string author{"Pendragon"};
-    std::string title{"Hello"};
-    std::string p{"Press"};
-    int year{}; //! test
+    std::string author{};
+    std::string title{};
+    std::string p{};
+    std::string year{}; //! test
     CitBook(std::string x, std::string i) : isbn(i), Citation(x) {}
     void print() override
     {
         std::cout << "[" << getid() << "] book: " << author << ", " << title << ", " << p << ", " << year << std::endl;
     }
+    void ask()override;
 };
+
 class CitWeb : public Citation
 {
     std::string url;
@@ -43,7 +46,9 @@ public:
     {
         std::cout << "[" << getid() << "] webpage: " << title << ". Available at " << url << std::endl;
     }
+    void ask()override;
 };
+
 class CitArt : public Citation
 {
     std::string title;
@@ -59,6 +64,7 @@ public:
     {
         std::cout << "[" << getid() << "] article: " << author << ", " << title << ", " << journal << ", " << year << ", " << volume << ", " << issue << std::endl;
     }
+    void ask()override{};
 };
 
 #endif
