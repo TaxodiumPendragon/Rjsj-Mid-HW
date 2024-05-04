@@ -117,6 +117,7 @@ void CitWeb::ask()
     {
         auto err = result.error();
         std::cerr << "HTTP error: " << httplib::to_string(err) << std::endl;
+        std::exit(1);
     }
 }
 
@@ -140,6 +141,7 @@ void CitBook::ask()
     {
         auto err = result.error();
         std::cerr << "HTTP error: " << httplib::to_string(err) << std::endl;
+        std::exit(1);
     }
 }
 
