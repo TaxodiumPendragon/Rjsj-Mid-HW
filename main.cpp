@@ -222,12 +222,16 @@ int main(int argc, char **argv)
     {
         for (auto c : citations)
         {
+            bool find = false;
             if (c->getid() == id)
             {
+                find = true;
                 printedCitations.push_back(c);
                 c->ask();
                 break;
             }
+            if (!find)
+                std::exit(1);
         }
     }
     std::ostream &output = std::cout;
