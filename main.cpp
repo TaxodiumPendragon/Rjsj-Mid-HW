@@ -184,19 +184,6 @@ int main(int argc, char **argv)
     {
         input = readFromFile(inputPath);
     }
-    std::ostream &output = std::cout;
-    if (!stdo)
-    {
-        std::ofstream file(outputPath);
-        if (!file)
-        {
-            std::cerr << "打不开文件：" << outputPath << std::endl;
-            std::exit(1);
-        }
-        std::ostream &output = file;
-    }
-    output << input; // print the paragraph first
-    output << "\nReferences:\n";
 
     std::vector<Citation *> printedCitations{};
     // TODO process citations in the input text
@@ -216,7 +203,19 @@ int main(int argc, char **argv)
         ids.push_back(idStr);
         pos = endPos;
     }
-
+    std::ostream &output = std::cout;
+    if (!stdo)
+    {
+        std::ofstream file(outputPath);
+        if (!file)
+        {
+            std::cerr << "打不开文件：" << outputPath << std::endl;
+            std::exit(1);
+        }
+        std::ostream &output = file;
+    }
+    output << input; // print the paragraph first
+    output << "\nReferences:\n";
     for (const auto &id : ids)
     {
         for (auto c : citations)
