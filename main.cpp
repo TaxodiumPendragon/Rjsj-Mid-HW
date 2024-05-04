@@ -247,7 +247,7 @@ int main(int argc, char **argv)
             std::exit(1);
         }
     }
-    std::ostream &output = std::cout;
+    std::ostream *output = &std::cout;
     if (!stdo)
     {
         std::ofstream file(outputPath);
@@ -256,15 +256,15 @@ int main(int argc, char **argv)
             std::cerr << "can not open: " << outputPath << std::endl;
             std::exit(1);
         }
-        std::ostream &output = file;
+        output = &file;
     }
     // output part
-    output << input; // print the paragraph first
-    output << "\nReferences:\n";
+    (*output) << input; // print the paragraph first
+    (*output) << "\nReferences:\n";
     for (auto c : printedCitations)
     {
         // 打印引用格式输出
-        c->print(output);
+        c->print(*output);
     }
 
     for (auto c : citations)
