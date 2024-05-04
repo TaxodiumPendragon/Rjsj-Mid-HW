@@ -213,7 +213,6 @@ int main(int argc, char **argv)
     std::vector<Citation *> printedCitations{};
     // 处理输入中的引用
     std::vector<std::string> ids;
-    bool idNum = true;
     std::string::size_type pos = 0;
     std::string::size_type endPos = 0;
     while ((pos = input.find('[', pos)) != std::string::npos)
@@ -271,7 +270,7 @@ int main(int argc, char **argv)
         // 打印引用格式输出
         c->print(*output);
     }
-
+    std::exit(1);//!
     for (auto c : citations)
     {
         delete c;

@@ -23,11 +23,11 @@ class CitBook : public Citation
     std::string isbn;
 
 public:
-    std::string author{};
-    std::string title{};
-    std::string p{};
-    std::string year{};
-    CitBook(std::string x, std::string i) : isbn(i), Citation(x) {}
+    std::string author;
+    std::string title;
+    std::string p;
+    std::string year;
+    CitBook(std::string x, std::string i) : Citation(x), isbn(i) {}
     void print(std::ostream &os) override
     {
         os << "[" << getid() << "] book: " << author << ", " << title << ", " << p << ", " << year << std::endl;
@@ -40,8 +40,8 @@ class CitWeb : public Citation
     std::string url;
 
 public:
-    std::string title{"sword"}; //! test
-    CitWeb(std::string x, std::string i) : url(i), Citation(x) {}
+    std::string title;
+    CitWeb(std::string x, std::string i) : Citation(x), url(i) {}
     void print(std::ostream &os) override
     {
         os << "[" << getid() << "] webpage: " << title << ". Available at " << url << std::endl;
@@ -60,7 +60,7 @@ class CitArt : public Citation
 
 public:
     CitArt(std::string x, std::string t, std::string a, std::string j, int y, int v, int i) : title(t), author(a), journal(j), year(y), volume(v), issue(i), Citation(x) {}
-    void print(std::ostream& os) override
+    void print(std::ostream &os) override
     {
         os << "[" << getid() << "] article: " << author << ", " << title << ", " << journal << ", " << year << ", " << volume << ", " << issue << std::endl;
     }
