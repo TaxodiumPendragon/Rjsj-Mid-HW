@@ -157,14 +157,16 @@ int main(int argc, char **argv)
     std::string inputPath;
     std::string outputPath;
 
+    bool citExist = false;
     for (int i = 1; i < argc - 1; i++)
     {
         std::string arg = argv[i];
-        if (arg == "-c" && i + 1 < argc)
+        if (arg == "-c" && i + 1 < argc && !citExist)
         {
+            citExist = true;
             citationPath = argv[++i];
         }
-        else if (arg == "-o" && i + 1 < argc)
+        else if (arg == "-o" && i + 1 < argc && stdo)
         {
             stdo = false;
             outputPath = argv[++i];
