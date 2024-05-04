@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         }
         else if (arg == "-")
             break;
-        else if (i == 5)
+        else if (i == 5 || i == 3)
         {
             stdi = false;
             inputPath = arg;
@@ -257,4 +257,5 @@ int main(int argc, char **argv)
     {
         delete c;
     }
+    return 0;
 }
