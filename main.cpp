@@ -248,9 +248,10 @@ int main(int argc, char **argv)
         }
     }
     std::ostream *output = &std::cout;
+    std::ofstream file;
     if (!stdo)
     {
-        std::ofstream file(outputPath);
+        file.open(outputPath);
         if (!file)
         {
             std::cerr << "can not open: " << outputPath << std::endl;
