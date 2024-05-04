@@ -13,7 +13,7 @@ std::string readFromFile(const std::string &inputPath)
     std::ifstream file(inputPath);
     if (!file)
     {
-        std::cerr << "无法打开文件: " << inputPath << std::endl;
+        std::cerr << "can not open file: " << inputPath << std::endl;
         std::exit(1);
     }
 
@@ -33,6 +33,7 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     std::ifstream file{filename};
     if (!file.is_open())
     {
+        printf("can not open cite file\n");
         std::exit(1);
     }
     nlohmann::json data;
@@ -62,28 +63,30 @@ std::vector<Citation *> loadCitations(const std::string &filename)
                 printf("ISBN Error!");
                 std::exit(1);
             }
-            citation = new CitBook(id, cite["isbn"]);
+            citation = new CitBook(id, cite["isbn"].get<std::string>());
         }
 
         else if (t == "webpage")
         {
             if (!cite["url"].is_string())
             {
+                printf("url error!\n");
                 std::exit(1);
             }
-            citation = new CitWeb(id, cite["url"]);
+            citation = new CitWeb(id, cite["url"].get<std::string>());
         }
         else if (t == "article")
         {
             if (!cite["year"].is_number_integer() || !cite["volume"].is_number_integer() || !cite["issue"].is_number_integer() ||
                 !cite["title"].is_string() || !cite["author"].is_string() || !cite["journal"].is_string())
             {
+                printf("Article Error!\n");
                 std::exit(1);
             }
             int year = cite["year"].get<int>();
             int volume = cite["volume"].get<int>();
             int issue = cite["issue"].get<int>();
-            citation = new CitArt(id, cite["title"], cite["author"], cite["journal"], year, volume, issue);
+            citation = new CitArt(id, cite["title"].get<std::string>(), cite["author"].get<std::string>(), cite["journal"].get<std::string>(), year, volume, issue);
         }
         if (citation != nullptr)
         {
@@ -105,6 +108,7 @@ void CitWeb::ask()
         nlohmann::json t = nlohmann::json::parse(result->body);
         if (t["title"].is_string())
         {
+            printf("Web ask Error\n");
             std::exit(1);
         }
         title = t["title"].get<std::string>();
@@ -124,6 +128,7 @@ void CitBook::ask()
         nlohmann::json t = nlohmann::json::parse(result->body);
         if (t["author"].is_string() || t["title"].is_string() || t["publisher"].is_string() || t["year"].is_string())
         {
+            printf("Book Ask error\n");
             std::exit(1);
         }
         author = t["author"].get<std::string>();
@@ -144,12 +149,15 @@ int main(int argc, char **argv)
     bool stdi{true};
     // 处理一些命令行参数错误输入情况，处理了命令行本身参数有误的可能情况
     if (argc != 4 && argc != 6)
+    {
+        printf("Command Error!\n");
         std::exit(1);
+    }
     std::string citationPath;
     std::string inputPath;
     std::string outputPath;
 
-    for (int i = 1; i < argc; i++)
+    for (int i = 1; i < argc - 1; i++)
     {
         std::string arg = argv[i];
         if (arg == "-c" && i + 1 < argc)
@@ -161,19 +169,20 @@ int main(int argc, char **argv)
             stdo = false;
             outputPath = argv[++i];
         }
-        else if (arg == "-")
-            break;
-        else if (i == 5 || i == 3)
-        {
-            stdi = false;
-            inputPath = arg;
-        }
         else
         {
             // 错误的参数
-            std::cout << "Command Error" << std::endl;
+            printf("Command Error!\n");
             std::exit(1);
         }
+    }
+    if (argv[argc - 1] == "-")
+    {
+    }
+    else
+    {
+        stdi = false;
+        inputPath = argv[argc - 1];
     }
     // "docman", "-c", "citations.json", "input.txt"
     // TODO 处理错误：文章的中括号有误
@@ -199,7 +208,7 @@ int main(int argc, char **argv)
     }
 
     std::vector<Citation *> printedCitations{};
-    // TODO process citations in the input text
+    // 处理输入中的引用
     std::vector<std::string> ids;
     std::string::size_type pos = 0;
     std::string::size_type endPos = 0;
@@ -210,7 +219,7 @@ int main(int argc, char **argv)
         std::string::size_type prevEndPos = input.rfind(']', pos);
         if (endPos == std::string::npos || (nextPos != std::string::npos && nextPos < endPos) || (prevEndPos != std::string::npos && prevEndPos > pos))
         {
-            printf("输入的什么玩意儿\n");
+            printf("What you input\n");
             std::exit(1);
         }
         std::string idStr = input.substr(pos + 1, endPos - pos - 1);
@@ -231,7 +240,10 @@ int main(int argc, char **argv)
                 break;
             }
             if (!find)
+            {
+                printf("Id not found\n");
                 std::exit(1);
+            }
         }
     }
     std::ostream &output = std::cout;
@@ -240,7 +252,7 @@ int main(int argc, char **argv)
         std::ofstream file(outputPath);
         if (!file)
         {
-            std::cerr << "打不开文件：" << outputPath << std::endl;
+            std::cerr << "can not open: " << outputPath << std::endl;
             std::exit(1);
         }
         std::ostream &output = file;
