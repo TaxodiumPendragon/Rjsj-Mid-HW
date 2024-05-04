@@ -10,8 +10,8 @@ class Citation
 
 public:
     Citation(std::string x) : id(x) {}
-    virtual void print() = 0;
-    virtual void ask()=0;
+    virtual void print(std::ostream &os) = 0;
+    virtual void ask() = 0;
     std::string getid()
     {
         return id;
@@ -26,13 +26,13 @@ public:
     std::string author{};
     std::string title{};
     std::string p{};
-    std::string year{}; //! test
+    std::string year{};
     CitBook(std::string x, std::string i) : isbn(i), Citation(x) {}
-    void print() override
+    void print(std::ostream &os) override
     {
-        std::cout << "[" << getid() << "] book: " << author << ", " << title << ", " << p << ", " << year << std::endl;
+        os << "[" << getid() << "] book: " << author << ", " << title << ", " << p << ", " << year << std::endl;
     }
-    void ask()override;
+    void ask() override;
 };
 
 class CitWeb : public Citation
@@ -42,11 +42,11 @@ class CitWeb : public Citation
 public:
     std::string title{"sword"}; //! test
     CitWeb(std::string x, std::string i) : url(i), Citation(x) {}
-    void print() override
+    void print(std::ostream &os) override
     {
-        std::cout << "[" << getid() << "] webpage: " << title << ". Available at " << url << std::endl;
+        os << "[" << getid() << "] webpage: " << title << ". Available at " << url << std::endl;
     }
-    void ask()override;
+    void ask() override;
 };
 
 class CitArt : public Citation
@@ -60,11 +60,11 @@ class CitArt : public Citation
 
 public:
     CitArt(std::string x, std::string t, std::string a, std::string j, int y, int v, int i) : title(t), author(a), journal(j), year(y), volume(v), issue(i), Citation(x) {}
-    void print() override
+    void print(std::ostream& os) override
     {
-        std::cout << "[" << getid() << "] article: " << author << ", " << title << ", " << journal << ", " << year << ", " << volume << ", " << issue << std::endl;
+        os << "[" << getid() << "] article: " << author << ", " << title << ", " << journal << ", " << year << ", " << volume << ", " << issue << std::endl;
     }
-    void ask()override{};
+    void ask() override{};
 };
 
 #endif

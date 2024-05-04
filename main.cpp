@@ -3,8 +3,8 @@
 #include <vector>
 #include <cstring>
 
-#include "third_parties/nlohmann/json.hpp"
-#include "third_parties/cpp-httplib/httplib.h"
+#include "json.hpp"
+#include "httplib.h"
 #include "utils.hpp"
 #include "citation.h"
 
@@ -39,19 +39,39 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     for (auto &cite : data["citations"])
     {
         Citation *citation = nullptr;
-        std::string t = cite["type"];
-        std::string id = cite["id"];
+        if (!cite["type"].is_string() || !cite["id"].is_string())
+        {
+            printf("ID or type Error");
+            std::exit(1);
+        }
+        std::string t = cite["type"].get<std::string>();
+        std::string id = cite["id"].get<std::string>();
 
         if (t == "book")
         {
+            if (!cite["isbn"].is_string())
+            {
+                printf("ISBN Error!");
+                std::exit(1);
+            }
             citation = new CitBook(id, cite["isbn"]);
         }
+
         else if (t == "webpage")
         {
+            if (!cite["url"].is_string())
+            {
+                std::exit(1);
+            }
             citation = new CitWeb(id, cite["url"]);
         }
         else if (t == "article")
         {
+            if (!cite["year"].is_number_integer() || !cite["volume"].is_number_integer() || !cite["issue"].is_number_integer() ||
+                !cite["title"].is_string() || !cite["author"].is_string() || !cite["journal"].is_string())
+            {
+                std::exit(1);
+            }
             int year = cite["year"].get<int>();
             int volume = cite["volume"].get<int>();
             int issue = cite["issue"].get<int>();
@@ -68,13 +88,18 @@ std::vector<Citation *> loadCitations(const std::string &filename)
 }
 
 httplib::Client cli{API_ENDPOINT};
+
 void CitWeb::ask()
 {
     auto result = cli.Get("/title/" + encodeUriComponent(url));
     if (result && result->status == httplib::OK_200)
     {
         nlohmann::json t = nlohmann::json::parse(result->body);
-        title = t["title"];
+        if (t["title"].is_string())
+        {
+            std::exit(1);
+        }
+        title = t["title"].get<std::string>();
     }
     else
     {
@@ -89,10 +114,14 @@ void CitBook::ask()
     if (result && result->status == httplib::OK_200)
     {
         nlohmann::json t = nlohmann::json::parse(result->body);
-        author = t["author"];
-        title = t["title"];
-        p = t["publisher"];
-        year = t["year"];
+        if (t["author"].is_string() || t["title"].is_string() || t["publisher"].is_string() || t["year"].is_string())
+        {
+            std::exit(1);
+        }
+        author = t["author"].get<std::string>();
+        title = t["title"].get<std::string>();
+        p = t["publisher"].get<std::string>();
+        year = t["year"].get<std::string>();
     }
     else
     {
@@ -129,6 +158,7 @@ int main(int argc, char **argv)
         else
         {
             // 错误的参数
+            std::cout << "Command Error" << std::endl;
             std::exit(1);
         }
     }
@@ -155,22 +185,35 @@ int main(int argc, char **argv)
         input = readFromFile(inputPath);
     }
     std::ostream &output = std::cout;
+    if (!stdo)
+    {
+        std::ofstream file(outputPath);
+        if (!file)
+        {
+            std::cerr << "打不开文件：" << outputPath << std::endl;
+            std::exit(1);
+        }
+        std::ostream &output = file;
+    }
     output << input; // print the paragraph first
     output << "\nReferences:\n";
 
     std::vector<Citation *> printedCitations{};
     // TODO process citations in the input text
-
     std::vector<std::string> ids;
     std::string::size_type pos = 0;
+    std::string::size_type endPos = 0;
     while ((pos = input.find('[', pos)) != std::string::npos)
     {
-        std::string::size_type endPos = input.find(']', pos);
-        if (endPos != std::string::npos)
+        endPos = input.find(']', pos);
+        std::string::size_type nextPos = input.find('[', pos + 1);
+        std::string::size_type prevEndPos = input.rfind(']', pos);
+        if (endPos == std::string::npos || (nextPos != std::string::npos && nextPos < endPos) || (prevEndPos != std::string::npos && prevEndPos > pos))
         {
-            std::string idStr = input.substr(pos + 1, endPos - pos - 1);
-            ids.push_back(idStr);
+            std::exit(1);
         }
+        std::string idStr = input.substr(pos + 1, endPos - pos - 1);
+        ids.push_back(idStr);
         pos = endPos;
     }
 
@@ -186,11 +229,10 @@ int main(int argc, char **argv)
             }
         }
     }
-
     for (auto c : printedCitations)
     {
         // 打印引用格式输出
-        c->print();
+        c->print(output);
     }
 
     for (auto c : citations)
