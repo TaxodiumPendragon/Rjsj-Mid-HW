@@ -155,6 +155,10 @@ int main(int argc, char **argv)
         }
         else if (arg == "-")
             break;
+        else if (i == 5)
+        {
+            inputPath = argv[i];
+        }
         else
         {
             // 错误的参数
