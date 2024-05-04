@@ -176,11 +176,13 @@ int main(int argc, char **argv)
             std::exit(1);
         }
     }
-    if (argv[argc - 1] != "-")
+    std::string arg = argv[argc - 1]; // 应该使用std::string来接受为好，要不然需要很麻烦的比较
+    if (arg != "-")
     {
         stdi = false;
         inputPath = argv[argc - 1];
     }
+
     // "docman", "-c", "citations.json", "input.txt"
     // 处理错误：文章的中括号有误
     auto citations = loadCitations(citationPath);
@@ -199,14 +201,15 @@ int main(int argc, char **argv)
             input += line + "\n";
         }
     }
-    else if (!stdi)
+    else
     {
         input = readFromFile(inputPath);
     }
 
     std::vector<Citation *> printedCitations{};
     // 处理输入中的引用
-    std::vector<int> ids;
+    std::vector<std::string> ids;
+    bool idNum = true;
     std::string::size_type pos = 0;
     std::string::size_type endPos = 0;
     while ((pos = input.find('[', pos)) != std::string::npos)
@@ -219,16 +222,7 @@ int main(int argc, char **argv)
             printf("What you input\n");
             std::exit(1);
         }
-        std::string idStr = input.substr(pos + 1, endPos - pos - 1);
-        if (std::all_of(idStr.begin(), idStr.end(), ::isdigit))
-        {
-            ids.push_back(std::stoi(idStr));
-        }
-        else
-        {
-            printf("Invalid id: %s\n", idStr.c_str());
-            std::exit(1);
-        }
+        ids.push_back(id);
         pos = endPos;
     }
     std::sort(ids.begin(), ids.end());
@@ -263,6 +257,7 @@ int main(int argc, char **argv)
         }
         std::ostream &output = file;
     }
+    // output part
     output << input; // print the paragraph first
     output << "\nReferences:\n";
     for (auto c : printedCitations)
