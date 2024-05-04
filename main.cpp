@@ -157,7 +157,8 @@ int main(int argc, char **argv)
             break;
         else if (i == 5)
         {
-            inputPath = argv[i];
+            stdi = false;
+            inputPath = arg;
         }
         else
         {
@@ -201,6 +202,7 @@ int main(int argc, char **argv)
         std::string::size_type prevEndPos = input.rfind(']', pos);
         if (endPos == std::string::npos || (nextPos != std::string::npos && nextPos < endPos) || (prevEndPos != std::string::npos && prevEndPos > pos))
         {
+            printf("输入的什么玩意儿\n");
             std::exit(1);
         }
         std::string idStr = input.substr(pos + 1, endPos - pos - 1);
