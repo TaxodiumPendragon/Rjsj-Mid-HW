@@ -226,9 +226,10 @@ int main(int argc, char **argv)
     std::sort(ids.begin(), ids.end());
     for (const auto &id : ids)
     {
+        bool find = false;
         for (auto c : citations)
         {
-            bool find = false;
+
             if (c->getid() == id)
             {
                 find = true;
@@ -236,11 +237,11 @@ int main(int argc, char **argv)
                 c->ask();
                 break;
             }
-            if (!find)
-            {
-                printf("Id not found\n");
-                std::exit(1);
-            }
+        }
+        if (!find)
+        {
+            printf("Id not found\n");
+            std::exit(1);
         }
     }
     std::ostream &output = std::cout;
