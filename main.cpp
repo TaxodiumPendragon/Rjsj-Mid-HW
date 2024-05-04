@@ -207,6 +207,19 @@ int main(int argc, char **argv)
         ids.push_back(idStr);
         pos = endPos;
     }
+    std::sort(ids.begin(), ids.end());
+    for (const auto &id : ids)
+    {
+        for (auto c : citations)
+        {
+            if (c->getid() == id)
+            {
+                printedCitations.push_back(c);
+                c->ask();
+                break;
+            }
+        }
+    }
     std::ostream &output = std::cout;
     if (!stdo)
     {
@@ -220,18 +233,6 @@ int main(int argc, char **argv)
     }
     output << input; // print the paragraph first
     output << "\nReferences:\n";
-    for (const auto &id : ids)
-    {
-        for (auto c : citations)
-        {
-            if (c->getid() == id)
-            {
-                printedCitations.push_back(c);
-                c->ask();
-                break;
-            }
-        }
-    }
     for (auto c : printedCitations)
     {
         // 打印引用格式输出
