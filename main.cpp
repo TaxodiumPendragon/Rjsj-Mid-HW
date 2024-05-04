@@ -35,17 +35,13 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     {
         std::exit(1);
     }
-    //?
-    nlohmann::json j;
-    try
+
+    std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    if (str.empty() || str.front() != '{' || str.back() != '}')
     {
-        file >> j;
-    }
-    catch (nlohmann::json::parse_error &)
-    {
-        std::cerr << "文件不是有效的JSON:" << filename << std::endl;
         std::exit(1);
-    }//?
+    }
+
     nlohmann::json data = nlohmann::json::parse(file);
     for (auto &cite : data["citations"])
     {
