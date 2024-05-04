@@ -126,7 +126,7 @@ void CitBook::ask()
     if (result && result->status == httplib::OK_200)
     {
         nlohmann::json t = nlohmann::json::parse(result->body);
-        if (t["author"].is_string() || t["title"].is_string() || t["publisher"].is_string() || t["year"].is_string())
+        if (!t["author"].is_string() || !t["title"].is_string() || !t["publisher"].is_string() || !t["year"].is_string())
         {
             printf("Book Ask error\n");
             std::exit(1);
