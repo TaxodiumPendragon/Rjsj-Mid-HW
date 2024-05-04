@@ -13,7 +13,7 @@ std::string readFromFile(const std::string &inputPath)
     std::ifstream file(inputPath);
     if (!file)
     {
-        std::cerr << "can not open file: " << inputPath << std::endl;
+        std::cerr << "can not open input file: " << inputPath << std::endl;
         std::exit(1);
     }
 
@@ -199,14 +199,14 @@ int main(int argc, char **argv)
             input += line + "\n";
         }
     }
-    else
+    else if (!stdi)
     {
         input = readFromFile(inputPath);
     }
 
     std::vector<Citation *> printedCitations{};
     // 处理输入中的引用
-    std::vector<std::string> ids;
+    std::vector<int> ids;
     std::string::size_type pos = 0;
     std::string::size_type endPos = 0;
     while ((pos = input.find('[', pos)) != std::string::npos)
@@ -220,7 +220,15 @@ int main(int argc, char **argv)
             std::exit(1);
         }
         std::string idStr = input.substr(pos + 1, endPos - pos - 1);
-        ids.push_back(idStr);
+        if (std::all_of(idStr.begin(), idStr.end(), ::isdigit))
+        {
+            ids.push_back(std::stoi(idStr));
+        }
+        else
+        {
+            printf("Invalid id: %s\n", idStr.c_str());
+            std::exit(1);
+        }
         pos = endPos;
     }
     std::sort(ids.begin(), ids.end());
@@ -230,7 +238,7 @@ int main(int argc, char **argv)
         for (auto c : citations)
         {
 
-            if (c->getid() == id)
+            if (c->getid() == std::to_string(id))
             {
                 find = true;
                 printedCitations.push_back(c);
