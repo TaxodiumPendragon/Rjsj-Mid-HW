@@ -45,6 +45,11 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     {
         std::exit(1);
     }
+    if (data["citations"].empty())
+    {
+        printf("Citations file is empty\n");
+        std::exit(1);
+    }
     for (auto &cite : data["citations"])
     {
         Citation *citation = nullptr;
@@ -270,7 +275,6 @@ int main(int argc, char **argv)
         // 打印引用格式输出
         c->print(*output);
     }
-    std::exit(1);//!
     for (auto c : citations)
     {
         delete c;
