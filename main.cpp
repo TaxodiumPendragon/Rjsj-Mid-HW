@@ -222,7 +222,8 @@ int main(int argc, char **argv)
             printf("What you input\n");
             std::exit(1);
         }
-        ids.push_back(id);
+        std::string idStr = input.substr(pos + 1, endPos - pos - 1);
+        ids.push_back(idStr);
         pos = endPos;
     }
     std::sort(ids.begin(), ids.end());
@@ -232,7 +233,7 @@ int main(int argc, char **argv)
         for (auto c : citations)
         {
 
-            if (c->getid() == std::to_string(id))
+            if (c->getid() == id)
             {
                 find = true;
                 printedCitations.push_back(c);
