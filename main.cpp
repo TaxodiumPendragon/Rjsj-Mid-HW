@@ -45,7 +45,7 @@ std::vector<Citation *> loadCitations(const std::string &filename)
     {
         std::exit(1);
     }
-    if (data["citations"].empty())
+    if (data["citations"].empty())//惨痛的教训，引用会空，这是要报错的，虽然只有在输入也什么也没有的情况下才有绕过检查的可能性
     {
         printf("Citations file is empty\n");
         std::exit(1);
