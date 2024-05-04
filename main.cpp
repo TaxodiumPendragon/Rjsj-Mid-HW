@@ -106,7 +106,7 @@ void CitWeb::ask()
     if (result && result->status == httplib::OK_200)
     {
         nlohmann::json t = nlohmann::json::parse(result->body);
-        if (t["title"].is_string())
+        if (!t["title"].is_string())
         {
             printf("Web ask Error\n");
             std::exit(1);
@@ -176,16 +176,13 @@ int main(int argc, char **argv)
             std::exit(1);
         }
     }
-    if (argv[argc - 1] == "-")
-    {
-    }
-    else
+    if (argv[argc - 1] != "-")
     {
         stdi = false;
         inputPath = argv[argc - 1];
     }
     // "docman", "-c", "citations.json", "input.txt"
-    // TODO 处理错误：文章的中括号有误
+    // 处理错误：文章的中括号有误
     auto citations = loadCitations(citationPath);
 
     // read all input to the string
